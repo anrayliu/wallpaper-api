@@ -1,0 +1,25 @@
+---
+
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  run_unit_tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-gov5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+      
+      - name: Clean up and download dependencies
+        run: go mod tidy -v
+
+      - name: Check for code correctness
+        run: go vet -v ./...
+      
+      - name: Run tests with race detection
+        run: go test -v -race ./...
