@@ -24,3 +24,17 @@ func NewResponse400() ResponseError {
 		Message: "Target file not specified.",
 	}
 }
+
+func NewResponse502() ResponseError {
+	return ResponseError{
+		Code:    502,
+		Message: "Failed to fetch image from upstream server.",
+	}
+}
+
+func NewResponse500() ResponseError {
+	return ResponseError{
+		Code:    500,
+		Message: "Internal server error.",
+	}
+}
