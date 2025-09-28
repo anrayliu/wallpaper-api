@@ -56,15 +56,13 @@ func fetchBlob(w http.ResponseWriter, url string) {
 		return
 	}
 
-	for k, v := range resp.Header {
-		w.Header()[k] = v
-	}
-
-	w.WriteHeader(resp.StatusCode)
-
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		renderJSON(w, NewResponse500())
+	}
+
+	for k, v := range resp.Header {
+		w.Header()[k] = v
 	}
 
 }
