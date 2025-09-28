@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -71,8 +70,6 @@ func TestBadRequests(t *testing.T) {
 		if err != nil {
 			t.Errorf("Error decoding response body: %s", err)
 		}
-
-		fmt.Println(data)
 
 		_, exists := data["Code"]
 		if !exists {
