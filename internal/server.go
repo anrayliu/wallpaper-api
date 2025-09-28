@@ -119,6 +119,6 @@ func (server *HTTPServer) StartServer() {
 
 	log.Print("Server started...")
 
-	log.Fatal(server.srv.ListenAndServe())
+	panic(server.srv.ListenAndServe())
 
 }
