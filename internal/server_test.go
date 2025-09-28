@@ -89,7 +89,7 @@ func TestBadRequests(t *testing.T) {
 }
 
 func TestGoodRequest(t *testing.T) {
-	resp, err := http.Get("http://localhost:8000/get/moon.jpg")
+	resp, err := http.Get("http://localhost:8000/get/moon")
 	if err != nil {
 		t.Errorf("Request failed: %s", err)
 	}

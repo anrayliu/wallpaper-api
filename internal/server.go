@@ -35,7 +35,6 @@ type HTTPServer struct {
 // writing into response
 
 func fetchBlob(w http.ResponseWriter, url string) {
-
 	// validate request first, avoids linting error "Potential HTTP request made with variable"
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -51,6 +50,10 @@ func fetchBlob(w http.ResponseWriter, url string) {
 	}
 	defer resp.Body.Close()
 
+	for k, v := range resp.Header {
+		w.Header()[k] = v
+	}
+
 	if resp.StatusCode == 404 {
 		renderJSON(w, NewResponse404())
 		return
@@ -60,11 +63,6 @@ func fetchBlob(w http.ResponseWriter, url string) {
 	if err != nil {
 		renderJSON(w, NewResponse500())
 	}
-
-	for k, v := range resp.Header {
-		w.Header()[k] = v
-	}
-
 }
 
 // sets the route handlers
