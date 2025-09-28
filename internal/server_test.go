@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
 
-	server := HttpServer{}
+	server := HTTPServer{}
 
 	go func() {
 		server.StartServer()
@@ -98,10 +98,10 @@ func TestGoodRequest(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	content_type := resp.Header.Get("Content-Type")
+	contentType := resp.Header.Get("Content-Type")
 	len := resp.Header.Get("Content-Length")
-	int_len, err := strconv.Atoi(len)
-	if err != nil || int_len != 2056737 || content_type != "image/jpeg" {
+	intLen, err := strconv.Atoi(len)
+	if err != nil || intLen != 2056737 || contentType != "image/jpeg" {
 		t.Error("Bad response")
 	}
 

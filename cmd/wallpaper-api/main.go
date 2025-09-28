@@ -13,7 +13,7 @@ func main() {
 		log.Fatalf("Error loading .env file: %s", err)
 	}
 
-	server := server.HttpServer{}
+	server := server.HTTPServer{}
 
 	server.StartServer()
 }
