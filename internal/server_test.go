@@ -2,16 +2,24 @@ package internal
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 // allows loading of env file before testing
 
 func TestMain(m *testing.M) {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatalf("Error loading .env file: %s", err)
+	}
+
 	server := HTTPServer{}
 
 	go func() {
