@@ -96,8 +96,8 @@ func TestGoodRequest(t *testing.T) {
 	defer resp.Body.Close()
 
 	contentType := resp.Header.Get("Content-Type")
-	len := resp.Header.Get("Content-Length")
-	intLen, err := strconv.Atoi(len)
+	contentLen := resp.Header.Get("Content-Length")
+	intLen, err := strconv.Atoi(contentLen)
 	if err != nil || intLen != 2056737 || contentType != "image/jpeg" {
 		t.Error("Bad response")
 	}

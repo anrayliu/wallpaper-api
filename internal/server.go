@@ -17,7 +17,7 @@ func renderJSON[T ResponseError | ResponseSuccess](w http.ResponseWriter, respon
 
 	err := json.NewEncoder(w).Encode(response)
 	if err != nil {
-		// do nothing for now
+		log.Printf("Encoding error: %s", err)
 	}
 }
 
