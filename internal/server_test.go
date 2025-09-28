@@ -2,58 +2,69 @@ package internal
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"testing"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
-func TestServer(t *testing.T) {
-	type testCase struct {
-		path    string
-		success bool
-		code    int
+// allows loading of env file before testing
+
+func TestMain(m *testing.M) {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Printf("Error loading .env file: %s", err)
 	}
 
-	tests := []testCase{
-		{
-			"/",
-			false,
-			404,
-		},
-		{
-			"/bad/path",
-			false,
-			404,
-		},
-		{
-			"/badpath/",
-			false,
-			404,
-		},
-		{
-			"/get",
-			false,
-			400,
-		},
-		{
-			"/get/",
-			false,
-			400,
-		},
-		{
-			"/get/test",
-			true,
-			0,
-		},
-	}
-
-	server := HttpServer{}
+	server := HTTPServer{}
 
 	go func() {
 		server.StartServer()
 	}()
 
 	time.Sleep(time.Second)
+
+	exitVal := m.Run()
+
+	os.Exit(exitVal)
+}
+
+func TestBadRequests(t *testing.T) {
+	type testCase struct {
+		path string
+		code int
+	}
+
+	tests := []testCase{
+		{
+			"/",
+			404,
+		},
+		{
+			"/bad/path",
+			404,
+		},
+		{
+			"/badpath/",
+			404,
+		},
+		{
+			"/get",
+			400,
+		},
+		{
+			"/get/",
+			400,
+		},
+		{
+			"/get/does-not-exist.jpg",
+			404,
+		},
+	}
 
 	for _, test := range tests {
 		resp, err := http.Get("http://localhost:8000" + test.path)
@@ -63,15 +74,32 @@ func TestServer(t *testing.T) {
 		defer resp.Body.Close()
 
 		var data map[string]interface{}
-		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		err = json.NewDecoder(resp.Body).Decode(&data)
+		if err != nil {
 			t.Errorf("Error decoding response body: %s", err)
 		}
 
 		_, exists := data["Code"]
-		if exists == test.success {
-			t.Error("Path had incorrect success state")
+		if !exists {
+			t.Error("Did not receive an error.")
 		}
 
+	}
+
+}
+
+func TestGoodRequest(t *testing.T) {
+	resp, err := http.Get("http://localhost:8000/get/moon.jpg")
+	if err != nil {
+		t.Errorf("Request failed: %s", err)
+	}
+	defer resp.Body.Close()
+
+	contentType := resp.Header.Get("Content-Type")
+	contentLen := resp.Header.Get("Content-Length")
+	intLen, err := strconv.Atoi(contentLen)
+	if err != nil || intLen != 2056737 || contentType != "image/jpeg" {
+		t.Error("Bad response")
 	}
 
 }

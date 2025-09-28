@@ -25,7 +25,7 @@ func TestResponseError(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		var response ResponseError = test.callback()
+		response := test.callback()
 		if response.Code != test.code {
 			t.Errorf("Expected code %d, found %d.", test.code, response.Code)
 		}

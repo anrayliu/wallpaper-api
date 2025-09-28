@@ -2,12 +2,15 @@
 
 name: Tests
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   run_unit_tests:
     name: Run unit tests
     runs-on: ubuntu-latest
+    env:
+      SAS_URI: ${{ secrets.SAS_URI }}
+      SAS_TOKEN: ${{ secrets.SAS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
