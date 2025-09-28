@@ -3,13 +3,17 @@
 package internal
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 func renderJSON[T ResponseError | ResponseSuccess](w http.ResponseWriter, response T) {
@@ -24,6 +28,7 @@ func renderJSON[T ResponseError | ResponseSuccess](w http.ResponseWriter, respon
 type HTTPServer struct {
 	mux *http.ServeMux
 	srv *http.Server
+	db  *mongo.Client
 }
 
 // proxies azure blob storage by downloading image with SAS URI and
@@ -68,8 +73,16 @@ func fetchBlob(w http.ResponseWriter, url string) {
 
 func (server *HTTPServer) initHandlers() {
 	server.mux.HandleFunc("/get/{file}/", func(w http.ResponseWriter, r *http.Request) {
-		fileName := r.PathValue("file")
-		imagePath := fmt.Sprintf("%s%s?%s", os.Getenv("SAS_URI"), fileName, os.Getenv("SAS_TOKEN"))
+		mappedName, err := QueryName(server.db, r.PathValue("file"))
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			renderJSON(w, NewResponse404())
+			return
+		} else if err != nil {
+			renderJSON(w, NewResponse500())
+			return
+		}
+
+		imagePath := fmt.Sprintf("%s%s?%s", os.Getenv("SAS_URI"), mappedName, os.Getenv("SAS_TOKEN"))
 
 		fetchBlob(w, imagePath)
 	})
@@ -94,6 +107,17 @@ func (server *HTTPServer) StartServer() {
 		ReadTimeout:  2 * time.Second,
 		WriteTimeout: 2 * time.Second,
 	}
+
+	client, err := ConnectDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := client.Disconnect(context.TODO()); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	server.db = client
 
 	server.initHandlers()
 
