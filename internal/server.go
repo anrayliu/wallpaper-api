@@ -102,8 +102,8 @@ func (server *HTTPServer) StartServer() {
 	server.srv = &http.Server{
 		Addr:         ":8000",
 		Handler:      server.mux,
-		ReadTimeout:  2 * time.Second,
-		WriteTimeout: 2 * time.Second,
+		ReadTimeout:  20 * time.Second,
+		WriteTimeout: 20 * time.Second,
 	}
 
 	client, err := ConnectDB()
